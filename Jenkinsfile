@@ -41,6 +41,13 @@ pipeline {
                 echo 'Semua test berhasil!'
             }
         }
+stage('Simulasi Gagal') {
+            steps {
+                echo '--- Test email failure ---'
+                sh 'exit 1'
+            }
+        }
+        
         stage('Backup') {
             steps {
                 echo '--- Memulai proses Backup ---'
