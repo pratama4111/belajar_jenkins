@@ -47,25 +47,24 @@ pipeline {
             }
         }
 
-        stage('Backup') {
-            steps {
-                echo '--- Memulai proses Backup ---'
-                sh '''
-                    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-                    BACKUP_PATH=/tmp/backup/$TIMESTAMP
-                    mkdir -p $BACKUP_PATH
-                    echo "Backup dibuat di: $BACKUP_PATH"
+    stage('Backup') {
+    steps {
+        echo '--- Memulai proses Backup ---'
+        sh '''
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            BACKUP_PATH=/tmp/backup/$TIMESTAMP/workspace_backup
+            mkdir -p $BACKUP_PATH
+            echo "Backup dibuat di: $BACKUP_PATH"
 
-                    # Backup workspace
-                    cp -r $WORKSPACE $BACKUP_PATH/workspace_backup
+            cp -r $WORKSPACE/. $BACKUP_PATH/
 
-                    echo "Isi folder backup:"
-                    ls -lh $BACKUP_PATH
+            echo "Isi folder backup:"
+            ls -lh $BACKUP_PATH
 
-                    echo "Backup selesai pada: $TIMESTAMP"
-                '''
-            }
-        }
+            echo "Backup selesai pada: $TIMESTAMP"
+        '''
+    }
+}
 
         stage('Deploy') {
             steps {
