@@ -5,7 +5,7 @@ pipeline {
         DEVELOPER = 'Aditia Pratama'
         VERSION = '1.0.0'
         BACKUP_DIR = '/tmp/backup'
-        EMAIL_TO = 'emailkamu@gmail.com'
+        EMAIL_TO = 'pratamaaditia938@gmail.com'
     }
     stages {
         stage('Persiapan') {
@@ -68,71 +68,45 @@ pipeline {
                 '''
             }
         }
-        stage('Simulasi Gagal') {
-            steps {
-                echo '--- Sengaja dibuat gagal untuk test email ---'
-                sh 'exit 1'
-            }
-        }
     }
     post {
-        success {
-            echo '==============================='
-            echo '   BUILD BERHASIL! SUCCESS     '
-            echo '==============================='
-            mail to: "${EMAIL_TO}",
-                 subject: "SUCCESS: Build #${env.BUILD_NUMBER} - ${APP_NAME}",
-                 body: """
-Halo ${DEVELOPER},
-
-Build pipeline berhasil dijalankan!
-
-==============================
-INFO BUILD
-==============================
-Aplikasi  : ${APP_NAME}
-Versi     : ${VERSION}
-Build No  : ${env.BUILD_NUMBER}
-Branch    : ${env.GIT_BRANCH}
-Status    : SUCCESS
-
-Cek detail: ${env.BUILD_URL}
-==============================
-
-Salam,
-Jenkins CI/CD
-                 """
-        }
-        failure {
-            echo '==============================='
-            echo '   BUILD GAGAL! FAILURE        '
-            echo '==============================='
-            mail to: "${EMAIL_TO}",
-                 subject: "FAILURE: Build #${env.BUILD_NUMBER} - ${APP_NAME}",
-                 body: """
-Halo ${DEVELOPER},
-
-Build pipeline GAGAL! Segera periksa.
-
-==============================
-INFO BUILD
-==============================
-Aplikasi  : ${APP_NAME}
-Versi     : ${VERSION}
-Build No  : ${env.BUILD_NUMBER}
-Branch    : ${env.GIT_BRANCH}
-Status    : FAILURE
-
-Cek detail: ${env.BUILD_URL}
-==============================
-
-Salam,
-Jenkins CI/CD
-                 """
-        }
         always {
-            echo "Pipeline selesai - Build #${env.BUILD_NUMBER}"
-            sh 'echo "Daftar semua backup:" && ls /tmp/backup/ || true'
+            script {
+                def status = currentBuild.result ?: 'SUCCESS'
+                def emoji = status == 'SUCCESS' ? 'BERHASIL' : 'GAGAL'
+                def pesan = status == 'SUCCESS'
+                    ? 'Build pipeline berhasil dijalankan!'
+                    : 'Build pipeline GAGAL! Segera periksa.'
+
+                echo '==============================='
+                echo "   BUILD ${emoji}!             "
+                echo '==============================='
+
+                mail to: "${EMAIL_TO}",
+                     subject: "${status}: Build #${env.BUILD_NUMBER} - ${APP_NAME}",
+                     body: """
+Halo ${DEVELOPER},
+
+${pesan}
+
+==============================
+INFO BUILD
+==============================
+Aplikasi  : ${APP_NAME}
+Versi     : ${VERSION}
+Build No  : ${env.BUILD_NUMBER}
+Branch    : ${env.GIT_BRANCH}
+Status    : ${status}
+
+Cek detail: ${env.BUILD_URL}
+==============================
+
+Salam,
+Jenkins CI/CD
+                     """
+
+                sh 'echo "Daftar semua backup:" && ls /tmp/backup/ || true'
+            }
         }
     }
 }
