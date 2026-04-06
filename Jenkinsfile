@@ -5,6 +5,7 @@ pipeline {
         APP_NAME = 'Belajar Jenkins'
         DEVELOPER = 'Aditia Pratama'
         VERSION = '1.0.0'
+        BACKUP_DIR = '/tmp/backup'
     }
 
     stages {
@@ -46,11 +47,36 @@ pipeline {
             }
         }
 
+        stage('Backup') {
+            steps {
+                echo '--- Memulai proses Backup ---'
+                sh '''
+                    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                    BACKUP_PATH=/tmp/backup/$TIMESTAMP
+                    mkdir -p $BACKUP_PATH
+                    echo "Backup dibuat di: $BACKUP_PATH"
+
+                    # Backup workspace
+                    cp -r $WORKSPACE $BACKUP_PATH/workspace_backup
+
+                    echo "Isi folder backup:"
+                    ls -lh $BACKUP_PATH
+
+                    echo "Backup selesai pada: $TIMESTAMP"
+                '''
+            }
+        }
+
         stage('Deploy') {
             steps {
                 echo '--- Deployment ---'
                 echo "Mendeploy ${APP_NAME} ke server..."
-                echo 'Deploy berhasil!'
+                sh '''
+                    echo "Verifikasi backup tersedia sebelum deploy..."
+                    ls /tmp/backup/
+                    echo "Backup terverifikasi, melanjutkan deploy..."
+                    echo "Deploy selesai!"
+                '''
             }
         }
 
@@ -69,6 +95,7 @@ pipeline {
         }
         always {
             echo "Pipeline selesai - Build #${env.BUILD_NUMBER}"
+            sh 'echo "Daftar semua backup:" && ls /tmp/backup/ || true'
         }
     }
 }
