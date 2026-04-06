@@ -5,7 +5,7 @@ pipeline {
         DEVELOPER = 'Aditia Pratama'
         VERSION = '1.0.0'
         BACKUP_DIR = '/tmp/backup'
-        EMAIL_TO = 'pratamaaditia938@gmail.com'
+        EMAIL_TO = 'emailkamu@gmail.com'
     }
     stages {
         stage('Persiapan') {
@@ -66,6 +66,12 @@ pipeline {
                     echo "Backup terverifikasi, melanjutkan deploy..."
                     echo "Deploy selesai!"
                 '''
+            }
+        }
+        stage('Simulasi Gagal') {
+            steps {
+                echo '--- Sengaja dibuat gagal untuk test email ---'
+                sh 'exit 1'
             }
         }
     }
